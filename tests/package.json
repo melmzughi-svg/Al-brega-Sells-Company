@@ -5,12 +5,12 @@
   "scripts": {
     "rules": "cp ../firestore.rules ./firestore.rules && firebase emulators:exec --only firestore --project demo-brega \"node rules/rules.test.mjs\"",
     "serve": "python3 -m http.server 8765 --bind 127.0.0.1 --directory ..",
-    "browser": "node browser/xss.js && ROLE=w node browser/xss.js && node browser/auth.js && node browser/pwa.js && node browser/palette.js && node browser/govern.js && node browser/polish.js && node browser/offline.js && node browser/sms055.js && node browser/home.js && node browser/meetnotify.js && node browser/filescope.js && node browser/csp.js && node browser/auditlog.js && node browser/powerbi.js && node browser/orgpeople.js && node browser/safety.js"
+    "browser": "node browser/units.js && node browser/xss.js && ROLE=w node browser/xss.js && node browser/auth.js && node browser/pwa.js && node browser/palette.js && node browser/govern.js && node browser/polish.js && node browser/offline.js && node browser/sms055.js && node browser/closures.js && node browser/debts.js && node browser/margin.js && node browser/margin-econ.js && node browser/brega-request.js && node browser/home.js && node browser/meetnotify.js && node browser/filescope.js && node browser/csp.js && node browser/auditlog.js && node browser/powerbi.js && node browser/orgpeople.js && node browser/safety.js && node browser/formats.js && node browser/pdf.js && node browser/ocr.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.4",
     "firebase": "^10.14.1",
     "firebase-tools": "^13.35.1",
-    "playwright": "^1.49.0"
+    "playwright": ">=1.49.0 <1.65.0"
   }
 }

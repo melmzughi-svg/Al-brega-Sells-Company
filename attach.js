@@ -188,7 +188,7 @@ async function vshow(){const a=V.list[V.i],k=kind(a),n=V.list.length;if(V.url){U
 
 /* PDFs are drawn page by page with pdf.js so they display the same on phones and desktops. */
 let pdfjsP=null;
-function pdfjs(){if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);if(!pdfjsP)pdfjsP=new Promise((res,rej)=>{const s=document.createElement('script');s.src='vendor/pdfjs/pdf.min.js';s.integrity='sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e';s.crossOrigin='anonymous';
+function pdfjs(){if(window.FileImport&&FileImport.pdfjs)return FileImport.pdfjs();if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);if(!pdfjsP)pdfjsP=new Promise((res,rej)=>{const s=document.createElement('script');s.src='vendor/pdfjs/pdf.min.js';s.integrity='sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e';s.crossOrigin='anonymous';
   s.onload=()=>{if(!window.pdfjsLib)return rej(new Error('pdfjs'));pdfjsLib.GlobalWorkerOptions.workerSrc='vendor/pdfjs/pdf.worker.min.js';res(pdfjsLib)};s.onerror=()=>{pdfjsP=null;rej(new Error('pdfjs'))};document.head.appendChild(s)});return pdfjsP}
 async function pdfPages(blob,body,want){
   try{const lib=await pdfjs();const doc=await lib.getDocument({data:new Uint8Array(await blob.arrayBuffer())}).promise;if(want!==V.i)return null;

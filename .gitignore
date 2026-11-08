@@ -9,6 +9,7 @@ data/
 originals/
 package/
 *.xlsx
+!tests/fixtures/formats/*.xlsx
 seed*.json
 !tests/fixtures/seed.sample.json
 tests/package-lock.json

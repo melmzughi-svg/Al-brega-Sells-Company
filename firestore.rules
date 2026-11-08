@@ -137,6 +137,61 @@ service cloud.firestore {
       allow create: if smsWriter() && (validBatch() || validPart());
       allow delete: if smsWriter();
     }
+    // لوحات مركز تقارير الإقفال الأخرى (تحليل المبيعات sales_report، حركة التحويلات transfers_report، أذونات الاستلام receipts_report) ولوحة الديون debts_report:
+    // الشكل نفسه والصلاحيات نفسها كـ sms055 — ملف مستورد (batch) وأجزاء صفوفه (part)، لا تُعدَّل بعد الحفظ.
+    match /{col}/{id} {
+      function isClosures() { return col in ['sales_report', 'transfers_report', 'receipts_report', 'debts_report']; }
+      function clxWriter() { return isAdmin() || (canWrite() && myUnit() in ['ca', 'gm']); }
+      function validClxBatch() { return request.resource.data.kind == 'batch'
+        && request.resource.data.keys().hasOnly(['kind', 'file', 'sheet', 'from', 'to', 'rows', 'parts', 'value', 'returns', 'createdBy', 'by', 'at'])
+        && request.resource.data.createdBy == me() && str(request.resource.data, 'file', 200) && str(request.resource.data, 'sheet', 100)
+        && str(request.resource.data, 'from', 10) && str(request.resource.data, 'to', 10) && str(request.resource.data, 'by', 120)
+        && request.resource.data.rows is int && request.resource.data.parts is int && request.resource.data.parts <= 200
+        && request.resource.data.value is number && request.resource.data.returns is number && str(request.resource.data, 'at', 40); }
+      function validClxPart() { return request.resource.data.kind == 'part'
+        && request.resource.data.keys().hasOnly(['kind', 'batch', 'n', 'd', 'createdBy'])
+        && request.resource.data.createdBy == me() && request.resource.data.n is int
+        && request.resource.data.d is string && request.resource.data.d.size() <= 900000 && id == request.resource.data.batch + '_p' + string(request.resource.data.n); }
+      allow read: if isClosures() && (top() || mine('ca'));
+      allow create: if isClosures() && clxWriter() && (validClxBatch() || validClxPart());
+      allow delete: if isClosures() && clxWriter();
+    }
+    // هامش الربح (إدارة الشؤون التجارية والتحصيلات): وثيقة واحدة margin/prices بأسعار المنتجات وتكاليفها (بتاريخ سريان)
+    // وسعر الصرف والهامش المستهدف وقائمة الزبائن الأجانب. بيانات مالية: تقرؤها الإدارة والإدارة العامة والمجلس والمدير،
+    // ويعدّلها المدير أو محرر من الإدارة أو الإدارة العامة باسمه، ولا يحذفها إلا المدير.
+    match /margin/{id} {
+      function marginWriter() { return isAdmin() || (canWrite() && myUnit() in ['ca', 'gm']); }
+      function validMargin() { return id == 'prices'
+        && request.resource.data.keys().hasOnly(['products', 'rates', 'cur', 'target', 'min', 'foreign', 'updatedBy', 'by', 'at'])
+        && request.resource.data.updatedBy == me()
+        && request.resource.data.products is list && request.resource.data.products.size() <= 400
+        && request.resource.data.rates is list && request.resource.data.rates.size() <= 400
+        && request.resource.data.foreign is list && request.resource.data.foreign.size() <= 5000
+        && str(request.resource.data, 'cur', 8) && str(request.resource.data, 'by', 120) && str(request.resource.data, 'at', 40)
+        && request.resource.data.target is number && request.resource.data.target >= 0 && request.resource.data.target < 100
+        && request.resource.data.min is number && request.resource.data.min >= 0 && request.resource.data.min < 100; }
+      // بيانات البريقة الشهرية للنموذج الشامل (margin-econ.js): مرجع واحد econ_ref (المنتجات وهيكل السعر وأسعار الفئات)،
+      // ووثيقة لكل شهر econ_YYYY-MM (الاستلامات وتكاليف المستودعات والمخزون والدعم والمصروفات والذمم)،
+      // ومبيعات الشهر حسب الزبون مقسّمة على econs_YYYY-MM_N حتى لا تتجاوز الوثيقة حدها
+      function econMeta() { return request.resource.data.updatedBy == me()
+        && str(request.resource.data, 'by', 120) && str(request.resource.data, 'at', 40); }
+      function econList(k) { return !(k in request.resource.data) || (request.resource.data[k] is list && request.resource.data[k].size() <= 6000); }
+      function validEcon() { return econMeta() && (
+        (id == 'econ_ref'
+          && request.resource.data.keys().hasOnly(['prods', 'struct', 'segs', 'src', 'updatedBy', 'by', 'at'])
+          && econList('prods') && econList('struct') && econList('segs'))
+        || (id.matches('econ_[0-9]{4}-[0-9]{2}')
+          && request.resource.data.keys().hasOnly(['m', 'recv', 'dep', 'stock', 'sub', 'opex', 'ar', 'sp', 'src', 'updatedBy', 'by', 'at'])
+          && request.resource.data.m == id[5:12] && request.resource.data.sp is int && request.resource.data.sp >= 0 && request.resource.data.sp <= 40
+          && econList('recv') && econList('dep') && econList('stock') && econList('sub') && econList('opex') && econList('ar'))
+        || (id.matches('econs_[0-9]{4}-[0-9]{2}_[0-9]{1,2}')
+          && request.resource.data.keys().hasOnly(['m', 'k', 'sales', 'updatedBy', 'by', 'at'])
+          && request.resource.data.m == id[6:13] && request.resource.data.k is int
+          && request.resource.data.sales is list && request.resource.data.sales.size() <= 3000)); }
+      allow read: if top() || mine('ca');
+      allow create, update: if marginWriter() && (validMargin() || validEcon());
+      allow delete: if isAdmin();
+    }
     // مهام الإدارات المضافة من داخل المنظومة: يقرؤها الجميع ويكتبها مدير النظام فقط
     match /duties/{unit} {
       allow read: if hasRole();

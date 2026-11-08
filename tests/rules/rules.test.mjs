@@ -267,7 +267,64 @@ await T('editor writes access-review denied',W.doc('config/access-review').set({
  await T('saved batch cannot be edited',CA.doc('sms055/B1').update({rows:999}),0);
  await T('ca viewer cannot delete',CAV.doc('sms055/B1').delete(),0);
  await T('ca editor deletes a file',CA.doc('sms055/B1_p0').delete(),1);
- await T('admin deletes a file',A.doc('sms055/B4').delete(),1);}
+ await T('admin deletes a file',A.doc('sms055/B4').delete(),1);
+ // --- closing-reports dashboards (sales_report / transfers_report / receipts_report): same shape and rights as sms055
+ for(const col of ['sales_report','transfers_report','receipts_report','debts_report']){
+  const cb=(o)=>Object.assign(bt({file:col+'.xlsx'}),o),cp=(o)=>Object.assign(pt({d:'{"F":[],"D":{},"R":[]}'}),o);
+  await T(col+': ca editor saves a part',CA.doc(col+'/B1_p0').set(cp()),1);
+  await T(col+': ca editor saves a batch',CA.doc(col+'/B1').set(cb()),1);
+  await T(col+': ca viewer reads',CAV.collection(col).get(),1);
+  await T(col+': gm reads',G.collection(col).get(),1);
+  await T(col+': board reads',B.collection(col).get(),1);
+  await T(col+': w cannot read',W.collection(col).get(),0);
+  await T(col+': ca viewer cannot import',CAV.doc(col+'/B2').set(cb({createdBy:'cav@b.ly'})),0);
+  await T(col+': w editor cannot import',W.doc(col+'/B3').set(cb({createdBy:'w@b.ly'})),0);
+  await T(col+': batch extra field denied',CA.doc(col+'/B6').set(cb({x:1})),0);
+  await T(col+': part id must match batch and n',CA.doc(col+'/B1_p7').set(cp({n:0})),0);
+  await T(col+': saved batch cannot be edited',CA.doc(col+'/B1').update({rows:999}),0);
+  await T(col+': ca viewer cannot delete',CAV.doc(col+'/B1').delete(),0);
+  await T(col+': ca editor deletes a file',CA.doc(col+'/B1_p0').delete(),1);}
+ // --- profit margin: one prices document, financial data for ca / gm / board / admin
+ {const mp=(o)=>Object.assign({products:[{p:'44347',pn:'ديزل',u:'م³',h:[{from:'2026-01-01',cost:120,loc:150,fx:40}]}],rates:[{from:'2026-01-01',rate:4.8}],cur:'USD',target:15,min:5,foreign:['120000'],updatedBy:'ca@b.ly',by:'CA',at:'2026-11-05T00:00:00Z'},o);
+  await T('margin: ca editor saves prices',CA.doc('margin/prices').set(mp()),1);
+  await T('margin: ca editor updates prices',CA.doc('margin/prices').set(mp({target:20})),1);
+  await T('margin: gm editor saves prices',G.doc('margin/prices').set(mp({updatedBy:'gm@b.ly'})),1);
+  await T('margin: ca viewer reads',CAV.doc('margin/prices').get(),1);
+  await T('margin: board reads',B.doc('margin/prices').get(),1);
+  await T('margin: w cannot read costs',W.doc('margin/prices').get(),0);
+  await T('margin: ca viewer cannot edit',CAV.doc('margin/prices').set(mp({updatedBy:'cav@b.ly'})),0);
+  await T('margin: w editor cannot edit',W.doc('margin/prices').set(mp({updatedBy:'w@b.ly'})),0);
+  await T('margin: must be signed by the writer',CA.doc('margin/prices').set(mp({updatedBy:'gm@b.ly'})),0);
+  await T('margin: only the prices document',CA.doc('margin/other').set(mp()),0);
+  await T('margin: extra field denied',CA.doc('margin/prices').set(mp({x:1})),0);
+  await T('margin: target must be a percent',CA.doc('margin/prices').set(mp({target:150})),0);
+  await T('margin: products must be a list',CA.doc('margin/prices').set(mp({products:'x'})),0);
+  await T('margin: ca editor cannot delete',CA.doc('margin/prices').delete(),0);
+  await T('margin: admin deletes',A.doc('margin/prices').delete(),1);}
+ // --- profit margin, full model: the Brega workbook (reference, one document per month, sales in parts)
+ {const em=(o)=>Object.assign({updatedBy:'ca@b.ly',by:'CA',at:'2026-11-05T00:00:00Z'},o);
+  const ref=em({prods:[{p:'44347',pn:'ديزل',d15:835}],struct:[],segs:[],src:'brega.xlsx'});
+  const mon=em({m:'2026-09',recv:[],dep:[],stock:[{w:'طرابلس',p:'44347',op:10,rc:100,sd:95,cl:14}],sub:[],opex:[],ar:[],sp:1,src:'brega.xlsx'});
+  const sal=em({m:'2026-09',k:0,sales:[{c:'1',p:'44347',q:5,v:100}]});
+  await T('econ: ca editor saves the reference',CA.doc('margin/econ_ref').set(ref),1);
+  await T('econ: ca editor saves a month',CA.doc('margin/econ_2026-09').set(mon),1);
+  await T('econ: ca editor saves a sales part',CA.doc('margin/econs_2026-09_0').set(sal),1);
+  await T('econ: gm editor saves a month',G.doc('margin/econ_2026-09').set(Object.assign({},mon,{updatedBy:'gm@b.ly'})),1);
+  await T('econ: board reads a month',B.doc('margin/econ_2026-09').get(),1);
+  await T('econ: ca viewer lists the collection',CAV.collection('margin').get(),1);
+  await T('econ: w cannot read',W.doc('margin/econ_2026-09').get(),0);
+  await T('econ: ca viewer cannot write',CAV.doc('margin/econ_2026-09').set(Object.assign({},mon,{updatedBy:'cav@b.ly'})),0);
+  await T('econ: month field must match the id',CA.doc('margin/econ_2026-10').set(mon),0);
+  await T('econ: sales part month must match',CA.doc('margin/econs_2026-10_0').set(sal),0);
+  await T('econ: bad month id',CA.doc('margin/econ_2026-9').set(Object.assign({},mon,{m:'2026-9'})),0);
+  await T('econ: extra field denied',CA.doc('margin/econ_2026-09').set(Object.assign({},mon,{x:1})),0);
+  await T('econ: sales not allowed in the month document',CA.doc('margin/econ_2026-09').set(Object.assign({},mon,{sales:[]})),0);
+  await T('econ: must be signed by the writer',CA.doc('margin/econ_ref').set(Object.assign({},ref,{updatedBy:'gm@b.ly'})),0);
+  await T('econ: list fields must be lists',CA.doc('margin/econ_ref').set(Object.assign({},ref,{prods:'x'})),0);
+  await T('econ: ca editor cannot delete',CA.doc('margin/econ_2026-09').delete(),0);}
+ // the wildcard match must not open other collections
+ await T('wildcard does not open the log to ca',CA.collection('log').get(),0);
+ await T('wildcard does not allow a batch in another collection',CA.doc('companies/B9').set(bt()),0);}
 // --- config/security: admins must sign in with Google once enforced (2-step via Google, no paid plan)
 {const AG=as('admin@b.ly',{firebase:{sign_in_provider:'google.com'}}),AP=as('admin@b.ly',{firebase:{sign_in_provider:'password'}});
  const sec=(v,by)=>({adminGoogle:v,by:by||'admin@b.ly',at:'2026-11-04T00:00:00Z'});

@@ -4,7 +4,7 @@
      a ready Power Query script with the column types, and a short read-me.
    - every Excel import gets a Power BI counterpart: a dialog explains «Export data» in Power BI, then opens the same file
      picker. The settings import now also reads .csv (Power BI exports CSV with a BOM).
-   Loaded after settings.js (which defines saveXlsx, readWorkbook, zipStore) and before odoo.js. */
+   Loaded after settings.js (saveXlsx, zipStore) and fileimport.js (readWorkbook) and before odoo.js. */
 (function(){
 "use strict";
 const en=()=>!!(window.I18N&&I18N.lang==='en');
@@ -129,7 +129,7 @@ let ARM=0;
 const __save=saveXlsx;
 saveXlsx=async function(sheets,filename){if(ARM&&Date.now()-ARM<4000){ARM=0;exportDialog(sheets,filename);return}return __save.apply(this,arguments)};
 
-/* ---------- CSV in the settings import (Power BI exports CSV with a BOM) ---------- */
+/* ---------- CSV parser (kept for callers of window.__biParseCsv) ---------- */
 function parseCsv(text){text=text.replace(/^\uFEFF/,'');const first=(text.split(/\r?\n/,1)[0]||'');
   const d=[',',';','\t'].map(c=>[c,first.split(c).length]).sort((a,b)=>b[1]-a[1])[0][0];
   const out=[];let row=[],f='',q=false;
@@ -142,16 +142,7 @@ function parseCsv(text){text=text.replace(/^\uFEFF/,'');const first=(text.split(
   if(f!==''||row.length){row.push(f);out.push(row)}
   return out}
 window.__biParseCsv=parseCsv;
-const cellIn=v=>{const s=String(v).trim().replace(/^'(?=[=+@\-])/,'');return NUMS.test(s)&&!/^0\d/.test(s)?Number(s):s};
-const __read=readWorkbook;
-readWorkbook=async function(file){
-  const head=new Uint8Array(await file.slice(0,2).arrayBuffer());
-  if(head[0]===0x50&&head[1]===0x4b)return __read(file);
-  if(/\.csv$/i.test(file.name||'')||/csv|text\/plain/.test(file.type||'')||!(head[0]===0xD0&&head[1]===0xCF)){
-    const grid=parseCsv(await file.text());const name=String(file.name||'CSV').replace(/\.[^.]+$/,'');
-    const rows=[];if(grid.length){const h=grid[0].map(x=>String(x).trim());grid.slice(1).forEach(g=>{if(!g.some(x=>String(x).trim()))return;const o={};h.forEach((k,i)=>{if(k)o[k]=cellIn(g[i]??'')});rows.push(o)})}
-    return {SheetNames:[name],rows:n=>n===name?rows:[]}}
-  return __read(file)};
+/* reading every import format (CSV from Power BI included) is done by fileimport.js */
 
 /* ---------- decorate the Excel buttons ---------- */
 let seq=0;
@@ -161,7 +152,7 @@ function decorate(){
   roots.forEach(root=>root.querySelectorAll('.btn:not([data-bi-done]):not([data-bi])').forEach(b=>{
     const txt=(b.textContent||'').trim();
     const exp=isExcel(b)&&(b.tagName==='BUTTON')&&(/تصدير|export/i.test(txt)||!!b.querySelector('svg path[d^="M12 4v11"]'));
-    const imp=(b.tagName==='LABEL'&&isExcel(b)&&b.querySelector('input[type=file]'))||(b.dataset.sm==='import');
+    const imp=(b.tagName==='LABEL'&&isExcel(b)&&b.querySelector('input[type=file]'))||(b.dataset.sm==='import')||(b.dataset.cx==='import')||(b.dataset.dbt==='import')||(b.dataset.pm==='import');
     if(!exp&&!imp)return;
     b.dataset.biDone='1';if(!b.id)b.id='bi-src-'+(++seq);
     const sm=b.classList.contains('sm');const prim=b.classList.contains('primary');

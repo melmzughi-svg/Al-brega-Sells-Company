@@ -5,7 +5,7 @@
 importScripts('version.js');
 const CACHE='brega-'+self.APP_VERSION;
 const FONTS='brega-fonts';
-const SHELL=['./','index.html','boot.js','app.css','i18n.js','adapter.js','core.js','dash.js','contracts.js','org.js','analytics.js','cs.js','app.js','settings.js','bi.js','bi-dash.js','offline.js','attach.js','meetings.js','duties-data.js','duties.js','sms055.js','home.js','odoo.js','version.js','releases.js','pwa.js','notify.js','govern.js','safety.js','orgpeople.js','palette.js','quality.js',
+const SHELL=['./','index.html','boot.js','app.css','i18n.js','adapter.js','core.js','dash.js','contracts.js','org.js','analytics.js','cs.js','app.js','settings.js','fileimport.js','ocrimport.js','bi.js','bi-dash.js','offline.js','attach.js','meetings.js','duties-data.js','duties.js','units.js','sms055.js','closures.js','debts.js','margin.js','margin-econ.js','home.js','odoo.js','version.js','releases.js','pwa.js','notify.js','govern.js','safety.js','orgpeople.js','palette.js','quality.js',
   'manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','icons/apple-touch-icon.png','icons/logo.webp','icons/favicon-64.png',
   'vendor/firebase/firebase-app-compat.js','vendor/firebase/firebase-auth-compat.js','vendor/firebase/firebase-firestore-compat.js',
   'vendor/pdfjs/pdf.min.js','vendor/pdfjs/pdf.worker.min.js'];

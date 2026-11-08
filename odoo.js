@@ -12,7 +12,7 @@ const tl=s=>(window.I18N&&I18N.t&&en())?I18N.t(s):s;
 
 /* apps = groups of screens; the first screen opens when the app's name is clicked */
 const APPS=[
- {id:'rep',ar:'التقارير والمؤشرات',en:'Reports & KPIs',v:['dash','ana','sms055']},
+ {id:'rep',ar:'التقارير والمؤشرات',en:'Reports & KPIs',v:['dash','ana','sms055','sales','transfers','receipts','debts','margin']},
  {id:'sales',ar:'العقود والاحتياجات',en:'Contracts & needs',v:['contracts','needs','batches','ext','dir']},
  {id:'work',ar:'المهام والاجتماعات',en:'Tasks & meetings',v:['duties','meetings','calendar']},
  {id:'cs',ar:'خدمة الزبائن',en:'Customer service',v:['cs']},

@@ -16,7 +16,9 @@ async function unzip(buf){const u8=new Uint8Array(buf),dv=new DataView(buf);let 
     const name=dec.decode(u8.subarray(p+46,p+46+nl));const lnl=dv.getUint16(lo+26,true),lxl=dv.getUint16(lo+28,true);const data=u8.subarray(lo+30+lnl+lxl,lo+30+lnl+lxl+csize);
     out[name]={method,data};p+=46+nl+xl+cl}
   return {names:Object.keys(out),async text(name){const f=out[name];if(!f)return null;if(f.method===0)return dec.decode(f.data);
-    const ds=new DecompressionStream('deflate-raw');const s=new Blob([f.data]).stream().pipeThrough(ds);return await new Response(s).text()}}}
+    const ds=new DecompressionStream('deflate-raw');const s=new Blob([f.data]).stream().pipeThrough(ds);return await new Response(s).text()},
+    async bytes(name){const f=out[name];if(!f)return null;if(f.method===0)return f.data;
+    const ds=new DecompressionStream('deflate-raw');const s=new Blob([f.data]).stream().pipeThrough(ds);return new Uint8Array(await new Response(s).arrayBuffer())}}}
 /* ---- XLSX write ---- */
 function xe(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'')}
 function colL(i){let s='';i++;while(i){const r=(i-1)%26;s=String.fromCharCode(65+r)+s;i=Math.floor((i-1)/26)}return s}
@@ -37,26 +39,7 @@ function buildXlsx(sheets){const n=sheets.length;const names=[];
     files.push([`xl/worksheets/sheet${si+1}.xml`,x])});
   return zipStore(files)}
 saveXlsx=async function(sheets,filename){try{const blob=buildXlsx(sheets.map(([n,r])=>[n,r.length?r:[{'':'لا توجد بيانات'}]]));await S.downloads.save({filename,data:blob});toast('تم تنزيل الملف')}catch(e){console.error(e);toast('تعذّر تجهيز الملف')}};
-/* ---- XLSX read ---- */
-async function readWorkbook(file){
-  if(typeof DecompressionStream==='undefined')throw new Error('المتصفح قديم ولا يدعم قراءة ملفات Excel. استخدم Chrome أو Edge حديثًا.');
-  let z;try{z=await unzip(await file.arrayBuffer())}catch(e){throw new Error('تعذّرت قراءة الملف. تأكد أنه ملف Excel بصيغة xlsx.')}
-  const P=s=>new DOMParser().parseFromString(s,'application/xml');const M='http://schemas.openxmlformats.org/spreadsheetml/2006/main';
-  const shared=[];const ss=await z.text('xl/sharedStrings.xml');if(ss){const d=P(ss);[...d.getElementsByTagNameNS(M,'si')].forEach(si=>shared.push([...si.getElementsByTagNameNS(M,'t')].map(t=>t.textContent).join('')))}
-  const dateSt=new Set();const sty=await z.text('xl/styles.xml');if(sty){const d=P(sty);const custom={};[...d.getElementsByTagNameNS(M,'numFmt')].forEach(f=>custom[+f.getAttribute('numFmtId')]=f.getAttribute('formatCode')||'');
-    const xfs=d.getElementsByTagNameNS(M,'cellXfs')[0];if(xfs)[...xfs.getElementsByTagNameNS(M,'xf')].forEach((xf,i)=>{const id=+(xf.getAttribute('numFmtId')||0),code=(custom[id]||'').toLowerCase();if((id>=14&&id<=22)||(id>=45&&id<=47)||(code&&/[dy]/.test(code)&&!/[#0]/.test(code)))dateSt.add(i)})}
-  const wb=P(await z.text('xl/workbook.xml'));const rels=P(await z.text('xl/_rels/workbook.xml.rels'));const rel={};[...rels.getElementsByTagName('Relationship')].forEach(r=>rel[r.getAttribute('Id')]=r.getAttribute('Target'));
-  const names=[],sheets={};
-  for(const sh of [...wb.getElementsByTagNameNS(M,'sheet')]){const nm=sh.getAttribute('name');const rid=sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');let t=rel[rid]||'';t=t.startsWith('/')?t.slice(1):'xl/'+t;const xml=await z.text(t);if(!xml)continue;
-    const d=P(xml);const grid=[];
-    [...d.getElementsByTagNameNS(M,'row')].forEach(row=>{const vals=[];[...row.getElementsByTagNameNS(M,'c')].forEach(c=>{const ref=c.getAttribute('r')||'';const L=(ref.match(/[A-Z]+/)||[''])[0];let ci=0;for(const ch of L)ci=ci*26+(ch.charCodeAt(0)-64);ci--;
-      const ty=c.getAttribute('t'),s=+(c.getAttribute('s')||0),v=c.getElementsByTagNameNS(M,'v')[0];let val='';
-      if(ty==='s'&&v)val=shared[+v.textContent]??'';else if(ty==='inlineStr')val=[...c.getElementsByTagNameNS(M,'t')].map(x=>x.textContent).join('');else if(ty==='str'||ty==='e')val=v?v.textContent:'';else if(ty==='b')val=v?v.textContent==='1':'';
-      else if(v){const num=parseFloat(v.textContent);if(isNaN(num))val=v.textContent;else if(dateSt.has(s)){const dt=new Date(Date.UTC(1899,11,30)+Math.round(num*86400000));val=dt.toISOString().slice(0,10)}else val=num}
-      if(ci>=0)vals[ci]=val});if(vals.length)grid.push(Array.from(vals,x=>x===undefined?'':x))});
-    const rows=[];if(grid.length){const h=grid[0].map(x=>String(x).trim());grid.slice(1).forEach(g=>{if(!g.some(x=>String(x).trim()))return;const o={};h.forEach((k,i)=>{if(k)o[k]=g[i]??''});rows.push(o)})}
-    names.push(nm);sheets[nm]=rows}
-  return {SheetNames:names,rows:n=>sheets[n]||[]}}
+/* ---- reading imports: readWorkbook() and every file format live in fileimport.js ---- */
 
 /* ===== Cloud extras: banners, initial data load, roles (users), activity log ===== */
 "use strict";
@@ -75,6 +58,7 @@ viewSettings=function(){const me=window.__me()||{};const admin=me.role==='admin'
    <p class="muted" style="margin:0 0 8px;font-size:13px">غيّر كلمة المرور من هنا مباشرة؛ ستُطلب منك إعادة تأكيد هويتك أولًا (بنافذة Google أو بكلمة المرور الحالية). إن كنت تدخل بحساب Google فقط فكلمة المرور اختيارية، وتعيينها يتيح لك الدخول بها أيضًا.</p>
    <form id="pw-form" novalidate style="display:grid;gap:8px;max-width:360px"><div class="field"><label for="pw-new">كلمة المرور الجديدة (8 أحرف على الأقل)</label><input id="pw-new" type="password" autocomplete="new-password" dir="ltr" minlength="8"></div><div class="field"><label for="pw-conf">تأكيد كلمة المرور</label><input id="pw-conf" type="password" autocomplete="new-password" dir="ltr"></div><div><button class="btn primary" type="submit" id="pw-save">تغيير كلمة المرور</button> <span id="pw-msg" role="status" style="font-size:12.5px"></span></div></form>
    <p class="muted" style="margin:8px 0 0;font-size:12px">أو <a href="#" data-act="pw-reset">أرسل رابط التغيير إلى البريد</a> (قد لا تصل الرسالة إلى بعض صناديق البريد).</p></div>
+  ${admin&&window.FuelUnits?FuelUnits.panel():''}
   ${admin?`<div class="panel"><h3 class="section-title">النسخ الاحتياطي</h3><p class="muted" style="margin:0 0 8px;font-size:13px">ملف Excel من قسم التصدير أعلاه للقراءة والمشاركة. أما النسخة الاحتياطية الكاملة لكل البيانات فمن لوحة «النسخة الاحتياطية الكاملة» أسفل هذه الصفحة.</p></div>`:''}</div>
   ${admin?`<div class="panel"><h3 class="section-title">المستخدمون والصلاحيات</h3>
    <p class="muted" style="margin:0 0 10px;font-size:13px">يُنشئ كل زميل حسابه بنفسه من شاشة الدخول (إنشاء حساب)، ثم تمنحه الصلاحية هنا ببريده الإلكتروني. <b>مدير النظام</b>: كل الصلاحيات · <b>محرر</b>: إضافة وتعديل وحذف · <b>مشاهد</b>: اطلاع وبحث وتصدير فقط.</p>

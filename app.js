@@ -54,7 +54,7 @@ function viewSettings(){
     <div><h3 class="section-title">المظهر</h3><p class="muted" style="margin:0 0 8px">نظام ألوان المنظومة على هذا الجهاز. يعمل مع المظهرين الفاتح والداكن.</p>${paletteChooser()}</div>
     <div><h3 class="section-title">تصدير</h3><p class="muted" style="margin:0 0 8px">ملف Excel واحد بكل الأوراق: العقود (مع الحالة المحسوبة)، الكشوفات، الدفعات، التمديدات، المراسلات.</p><button class="btn" data-act="export-all">${I.down}تصدير نسخة كاملة</button></div>
     ${S.canWrite?`<div><h3 class="section-title">استيراد من Excel</h3><p class="muted" style="margin:0 0 8px">يقبل ملف سجل العقود بنفس أعمدة ورقة «العقود» القديمة، أو ملفًا مُصدَّرًا من هذه المنظومة. السجلات الموجودة بنفس رقم العقد والشركة تُحدَّث ولا تتكرر.</p>
-     <label class="btn">${I.up}اختيار ملف Excel<input type="file" id="imp-file" accept=".xlsx,.xls,.csv" hidden></label><div id="imp-res" style="margin-top:10px"></div></div>`:''}
+     <label class="btn">${I.up}اختيار ملف Excel<input type="file" id="imp-file" accept="${FileImport.ACCEPT}" hidden></label><div id="imp-res" style="margin-top:10px"></div></div>`:''}
     <div><h3 class="section-title">مصادر البيانات الأولية</h3><ul class="muted" style="margin:0;padding-inline-start:18px;font-size:13px">
      <li>سجل العقود (contracts-register.xlsx) — ${S.contracts.length} عقد.</li>
      <li>كشوفات الدفعات من وزارة الصناعة والمعادن لشهر أكتوبر 2026 — ${S.needs.length} منشأة في ${S.batches.length} دفعات.</li>

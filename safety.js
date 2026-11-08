@@ -12,7 +12,7 @@ const FS=()=>window.__fs&&window.__fs();
 const say=m=>{try{toast(m)}catch(e){}};
 const roleAdmin=()=>{const m=me();return !!m&&m.role==='admin'};
 const DAYS=7;
-const COLS=['contracts','needs','batches','extensions','letters','companies','tickets','notices','config','records','assignments','meetings','duties','roles','sms055','log'];
+const COLS=['contracts','needs','batches','extensions','letters','companies','tickets','notices','config','records','assignments','meetings','duties','roles','sms055','sales_report','transfers_report','receipts_report','debts_report','margin','log'];
 const SF={sec:null,bk:null,provider:'',loaded:false,busy:false};
 
 async function provider(){const a=window.__auth&&window.__auth();const u=a&&a.currentUser;if(!u)return '';
