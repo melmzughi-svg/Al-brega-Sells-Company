@@ -6,7 +6,7 @@
   "author": "Brega Oil Marketing Company",
   "license": "UNLICENSED",
   "private": true,
-  "repository": "github:brega-sells/Al-brega-Sells-Company",
+  "repository": "github:melmzughi-svg/Al-brega-Sells-Company",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

@@ -1,10 +1,10 @@
 # منظومة الإدارة العامة للمبيعات والشؤون التجارية — شركة البريقة لتسويق النفط
 
-[![CI](https://github.com/brega-sells/Al-brega-Sells-Company/actions/workflows/ci.yml/badge.svg)](https://github.com/brega-sells/Al-brega-Sells-Company/actions/workflows/ci.yml)
+[![CI](https://github.com/melmzughi-svg/Al-brega-Sells-Company/actions/workflows/ci.yml/badge.svg)](https://github.com/melmzughi-svg/Al-brega-Sells-Company/actions/workflows/ci.yml)
 
 منظومة عربية (RTL) تعمل من المتصفح وتُثبَّت كتطبيق على الهاتف والحاسوب، لإدارة عقود البريقة وكشوفات احتياجات الوزارة، ومهام الإدارات وتكليفاتها، والاجتماعات المغلقة، وخدمة الزبائن، وسجلات كل إدارة ومرفقاتها.
 
-- **الرابط المباشر:** https://brega-sells.github.io/Al-brega-Sells-Company/
+- **الرابط المباشر:** https://melmzughi-svg.github.io/Al-brega-Sells-Company/
 - **الاستضافة:** الصفحة على GitHub Pages، والبيانات والدخول على Firebase (مشروع `brega-sales`: Firestore + Authentication بالبريد وكلمة المرور).
 - **دليل التشغيل للمالك ومدير النظام:** [docs/RUNBOOK.md](docs/RUNBOOK.md) · **سجل التغييرات:** [CHANGELOG.md](CHANGELOG.md) · **الأمان:** [docs/SECURITY.md](docs/SECURITY.md)
 

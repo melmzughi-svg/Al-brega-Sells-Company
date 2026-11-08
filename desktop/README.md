@@ -2,7 +2,7 @@
 
 برنامج ويندوز يفتح المنظومة في نافذة مستقلة باسمها وأيقونتها، دون شريط المتصفح.
 
-- **التحميل:** [BregaSales-Setup.exe](https://github.com/brega-sells/Al-brega-Sells-Company/releases/latest/download/BregaSales-Setup.exe) (مثبّت) أو [BregaSales-Portable.exe](https://github.com/brega-sells/Al-brega-Sells-Company/releases/latest/download/BregaSales-Portable.exe) (محمول بلا تثبيت).
+- **التحميل:** [BregaSales-Setup.exe](https://github.com/melmzughi-svg/Al-brega-Sells-Company/releases/latest/download/BregaSales-Setup.exe) (مثبّت) أو [BregaSales-Portable.exe](https://github.com/melmzughi-svg/Al-brega-Sells-Company/releases/latest/download/BregaSales-Portable.exe) (محمول بلا تثبيت).
 - **التحديث:** البرنامج يفتح المنظومة الحية على GitHub Pages، فكل تحديث للموقع يظهر فيه تلقائياً ولا حاجة لإعادة التثبيت. يُعاد بناء المثبّت فقط عند تغيير ملفات هذا المجلد.
 - **دون اتصال:** يحتاج أول تشغيل إلى الإنترنت، ثم يعمل دون اتصال عبر نفس آلية الموقع (Service Worker).
 - **تنبيه ويندوز:** المثبّت غير موقّع رقمياً، فقد يظهر «Windows protected your PC». اضغط «More info» ثم «Run anyway».

@@ -4,11 +4,13 @@
 
 | البند | القيمة |
 |---|---|
-| الرابط المباشر | https://brega-sells.github.io/Al-brega-Sells-Company/ |
-| مستودع الشيفرة | https://github.com/brega-sells/Al-brega-Sells-Company |
+| الرابط المباشر | https://melmzughi-svg.github.io/Al-brega-Sells-Company/ |
+| مستودع الشيفرة | https://github.com/melmzughi-svg/Al-brega-Sells-Company |
 | مشروع Firebase | `brega-sales` → https://console.firebase.google.com/project/brega-sales |
 | حساب المالك | m.elmzughi@gmail.com |
 | رقم الإصدار الحالي | يظهر أسفل القائمة الجانبية داخل المنظومة، ويُحفظ في `version.js` |
+
+> **نقل المستودع (2026-11-08):** انتقل المستودع والموقع من الحساب `brega-sells` إلى `melmzughi-svg`. يجب أن يكون النطاق `melmzughi-svg.github.io` مضافًا في Firebase Console → Authentication → Settings → Authorized domains، وإلا يفشل تسجيل الدخول بحساب Google. النشر من الفرع `main` (المجلد الجذر) عبر Settings → Pages.
 
 ---
 

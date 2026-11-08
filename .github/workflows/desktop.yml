@@ -3,7 +3,7 @@ name: Desktop app (Windows)
 # Builds the Windows installer and portable .exe for the desktop shell in desktop/.
 # Pull requests: build only, the files are attached to the run as an artifact.
 # main (when desktop/ changes) or a manual run: publish a GitHub Release "desktop-v<version>" and mark it latest, so
-# https://github.com/brega-sells/Al-brega-Sells-Company/releases/latest/download/BregaSales-Setup.exe always serves the newest build.
+# https://github.com/melmzughi-svg/Al-brega-Sells-Company/releases/latest/download/BregaSales-Setup.exe always serves the newest build.
 
 on:
   push:

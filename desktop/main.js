@@ -7,7 +7,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 
 // BREGA_APP_URL is honoured only when running from source (npm start), for local testing; the installed app ignores it.
-const APP_URL = (!app.isPackaged && process.env.BREGA_APP_URL) || 'https://brega-sells.github.io/Al-brega-Sells-Company/';
+const APP_URL = (!app.isPackaged && process.env.BREGA_APP_URL) || 'https://melmzughi-svg.github.io/Al-brega-Sells-Company/';
 const APP_ORIGIN = new URL(APP_URL).origin;
 const APP_PATH = new URL(APP_URL).pathname;
 // Hosts allowed to open inside the app (Google / Firebase sign-in popups). Everything else opens in the default browser.
